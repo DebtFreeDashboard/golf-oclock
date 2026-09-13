@@ -6,6 +6,7 @@ on:
     # Off the quarter-hour on purpose — that is when GitHub's queue is busiest.
     - cron: '7,22,37,52 9-23,0-3 * * *'
   workflow_dispatch:        # lets you run it by hand from the Actions tab
+
   push:
     branches: [main]
     paths:
