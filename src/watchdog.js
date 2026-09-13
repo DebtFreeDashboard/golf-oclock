@@ -99,7 +99,7 @@ async function main() {
     await push({
       title: '⛳ Watchdog test',
       body: 'If this reached your phone, stale-data and stuck-run alerts will too.',
-      priority: 'default',
+      priority: 'max',
       tags: 'white_check_mark',
     });
   }
