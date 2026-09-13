@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { matchesWatch, findNewMatches, currentKeys, mergeSeen, hotTargets } from '../src/alerts.js';
 import { to12h, normalizeTime, utcToLocalParts, addDays, slotKey } from '../src/lib.js';
+import { ageMinutes, freshness, stuckRuns } from '../src/watchdog.js';
 
 let passed = 0;
 const t = (name, fn) => {
@@ -285,6 +286,41 @@ await at('a single sold-out day does not truncate the rest of the week', async (
   const out = await fetchChronogolf(cgCourse, dates);
   assert.equal(new Set(seen.map(k => k.split('|')[0])).size, 4, 'should keep going past one empty day');
   assert.equal(out.length, 3);
+});
+
+console.log('watchdog');
+const NOW = Date.parse('2026-09-12T21:00:00Z');
+t('freshness passes on data written a few minutes ago', () => {
+  const f = freshness({ updatedAt: '2026-09-12T20:52:00Z' }, NOW, 45);
+  assert.equal(f.ok, true);
+  assert.equal(Math.round(f.age), 8);
+});
+t('freshness fails once the data is past the limit', () => {
+  assert.equal(freshness({ updatedAt: '2026-09-12T20:00:00Z' }, NOW, 45).ok, false);
+});
+t('freshness fails loudly on a missing or garbage timestamp', () => {
+  assert.equal(freshness({}, NOW, 45).ok, false);
+  assert.equal(freshness({ updatedAt: 'never' }, NOW, 45).ok, false);
+});
+t('a run queued longer than the limit is called stuck', () => {
+  const runs = [
+    { id: 1, status: 'queued',      created_at: '2026-09-12T20:25:00Z', run_number: 343, name: 'Fast alert poll' },
+    { id: 2, status: 'queued',      created_at: '2026-09-12T20:55:00Z', run_number: 344, name: 'Fast alert poll' },
+    { id: 3, status: 'in_progress', created_at: '2026-09-12T19:00:00Z', run_number: 345, name: 'Poll tee times' },
+    { id: 4, status: 'completed',   created_at: '2026-09-12T18:00:00Z', run_number: 346, name: 'Poll tee times' },
+  ];
+  const stuck = stuckRuns(runs, NOW, 20);
+  assert.equal(stuck.length, 1, 'only the long-queued run');
+  assert.equal(stuck[0].id, 1);
+  assert.equal(Math.round(stuck[0].waited), 35);
+});
+t('a long-running job is never mistaken for a stuck one', () => {
+  // in_progress means a runner picked it up. Slow is not the same as wedged.
+  const runs = [{ id: 9, status: 'in_progress', created_at: '2026-09-12T19:00:00Z', run_number: 1, name: 'Poll tee times' }];
+  assert.equal(stuckRuns(runs, NOW, 20).length, 0);
+});
+t('ageMinutes returns null rather than NaN on junk', () => {
+  assert.equal(ageMinutes('not-a-date', NOW), null);
 });
 
 globalThis.fetch = realFetch;
