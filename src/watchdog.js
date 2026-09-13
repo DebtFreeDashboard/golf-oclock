@@ -81,7 +81,10 @@ async function push({ title, body, priority = 'high', tags = 'warning' }) {
         click: `https://github.com/${REPO}/actions`,
       }),
     });
+    // Log the outcome either way. "No error" is not the same as "delivered",
+    // and telling those apart from the log is the whole point of this file.
     if (!res.ok) console.error(`[watchdog] push rejected: ${res.status} ${await res.text()}`);
+    else console.log(`[watchdog] push accepted by ${NTFY_SERVER} (HTTP ${res.status}). If your phone stayed quiet, the break is between ntfy and the handset, not in this repo.`);
   } catch (err) {
     console.error('[watchdog] push failed:', err.message);
   }
