@@ -6,6 +6,12 @@ on:
     # Off the quarter-hour on purpose — that is when GitHub's queue is busiest.
     - cron: '7,22,37,52 9-23,0-3 * * *'
   workflow_dispatch:        # lets you run it by hand from the Actions tab
+    inputs:
+      test_push:
+        description: 'Send a test notification, to prove ntfy reaches your phone'
+        type: boolean
+        default: false
+
   push:
     branches: [main]
     paths:
