@@ -1,10 +1,9 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "releaseDate": "2026-09-13",
-  "releaseName": "Alerts actually send",
+  "releaseName": "Alerts that cut through",
   "notes": [
-    "Fixed the bug that stopped every tee time alert from being delivered. Notification titles contain an emoji and an em dash, which cannot legally travel in an HTTP header — the push was rejected inside the app before it ever reached the notification service, and the error was caught and logged rather than surfaced. Alerts are now sent as JSON, which carries any character.",
-    "If you have been wondering why your phone never buzzed: this was why, and it had been happening since launch.",
-    "The watchdog reports a rejected push instead of swallowing it, so a delivery failure can never be silent again."
+    "Tee time alerts now arrive at maximum priority, so they are louder and harder to miss — and less likely to be folded into a notification summary and read an hour later. A slot can be gone in minutes; these only fire on a watch you set deliberately, so they are allowed to be insistent.",
+    "If they ever feel too aggressive, the level is a single number in the notifier."
   ]
 }
