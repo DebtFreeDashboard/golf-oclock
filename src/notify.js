@@ -52,7 +52,7 @@ export async function sendPush(hits) {
           title,
           message: body,
           tags: ['golf'],
-          priority: 3,
+          priority: 5,
           click: s.bookingUrl,
           actions: [{ action: 'view', label: 'Book now', url: s.bookingUrl }],
         }),
