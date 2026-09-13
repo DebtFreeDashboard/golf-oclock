@@ -22,6 +22,23 @@ jobs:
         with:
           node-version: '20'
 
+      # ── Poller state lives on the `state` branch, never on main ──────────
+      # main then only changes when Kevin changes it, so a local clone is never
+      # racing a bot that commits every few minutes — which is what repeatedly
+      # ate uncommitted work in GitHub Desktop on 2026-09-12.
+      # On the very first run `state` does not exist and main's copies seed it.
+      - name: Restore poller state
+        run: |
+          set -e
+          if git ls-remote --exit-code --heads origin state >/dev/null 2>&1; then
+            git fetch --depth=1 origin state
+            git checkout FETCH_HEAD -- data/teetimes.json data/seen.json
+            git reset -q
+            echo "State restored from the state branch."
+          else
+            echo "No state branch yet — seeding from the copies on main."
+          fi
+
       - name: Poll only what you have alerts on
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
@@ -30,18 +47,15 @@ jobs:
 
       - name: Save alert state
         run: |
+          set -e
           git config user.name  "golf-oclock-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/seen.json
+          # Both files are staged so the force-push carries the current tee time
+          # data forward rather than reverting `state` to main's frozen copy.
+          git add data/teetimes.json data/seen.json
           if git diff --staged --quiet; then
             echo "No change."
             exit 0
           fi
           git commit -m "fast poll $(date -u +'%H:%M UTC')"
-          for i in 1 2 3 4 5; do
-            if git push; then exit 0; fi
-            git pull --rebase --autostash origin main || git rebase --abort || true
-            sleep $((i * 3))
-          done
-          echo "::warning::Could not push alert state after 5 attempts."
-          exit 0
+          git push --force origin HEAD:state

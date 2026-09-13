@@ -38,6 +38,23 @@ jobs:
         with:
           node-version: '20'
 
+      # ── Poller state lives on the `state` branch, never on main ──────────
+      # main then only changes when Kevin changes it, so a local clone is never
+      # racing a bot that commits every few minutes — which is what repeatedly
+      # ate uncommitted work in GitHub Desktop on 2026-09-12.
+      # On the very first run `state` does not exist and main's copies seed it.
+      - name: Restore poller state
+        run: |
+          set -e
+          if git ls-remote --exit-code --heads origin state >/dev/null 2>&1; then
+            git fetch --depth=1 origin state
+            git checkout FETCH_HEAD -- data/teetimes.json data/seen.json
+            git reset -q
+            echo "State restored from the state branch."
+          else
+            echo "No state branch yet — seeding from the copies on main."
+          fi
+
       - name: Check the pipeline is alive
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
