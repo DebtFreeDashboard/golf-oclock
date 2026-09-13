@@ -9,4 +9,6 @@ Two rules from it that are easy to get wrong and expensive to miss:
 
 Background and design history are in `docs/`. `docs/build-notes.md` is the one to read first — it has the API details, the course IDs, and the reasons behind decisions that look arbitrary.
 
-**Do not commit or push.** Leave changes staged in the working tree; they get reviewed and pushed from GitHub Desktop.
+**Committing is fine — pushing is not.** Commit your work with a clear message; leave it on the local branch. Kevin reviews and pushes from GitHub Desktop. Ask before pushing.
+
+Never commit `data/` by hand. Those files belong to the poller, which rewrites them every few minutes; a manual commit there collides with the bot and gets rebased away.
