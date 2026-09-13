@@ -45,7 +45,7 @@ jobs:
           GOLF_NABNASSET_PASS: ${{ secrets.GOLF_NABNASSET_PASS }}
           GOLF_TRULLBROOK_USER: ${{ secrets.GOLF_TRULLBROOK_USER }}
           GOLF_TRULLBROOK_PASS: ${{ secrets.GOLF_TRULLBROOK_PASS }}
-          DAYS_AHEAD: '8'
+          DAYS_AHEAD: '9'
         run: node src/index.js
 
       - name: Commit the results
