@@ -1,6 +1,6 @@
 {
   "name": "golf-oclock",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "type": "module",
   "description": "Personal cross-course tee time finder and alerter for the Merrimack Valley / southern NH area.",

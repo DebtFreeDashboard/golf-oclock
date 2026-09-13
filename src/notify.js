@@ -38,18 +38,26 @@ export async function sendPush(hits) {
     const title = `⛳ ${s.courseName} — ${prettyDate(s.date)}`;
     const body = `${times.join(', ')}${more}${holes}${price}\n${group[0].watchLabels.join(', ')}${nudge}`;
 
+    // Publish as JSON, never as headers. HTTP header values are Latin-1 only,
+    // and the title carries an emoji (U+26F3) and an em dash (U+2014) — both
+    // above 255. Setting them as headers throws inside fetch before the request
+    // leaves the process, and the catch below swallowed it: every alert failed
+    // silently from launch until 2026-09-13. The JSON endpoint is UTF-8.
     try {
-      await fetch(`${SERVER}/${encodeURIComponent(topic)}`, {
+      const res = await fetch(SERVER, {
         method: 'POST',
-        headers: {
-          'Title': title,
-          'Tags': 'golf',
-          'Priority': 'default',
-          'Click': s.bookingUrl,
-          'Actions': `view, Book now, ${s.bookingUrl}`,
-        },
-        body,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          title,
+          message: body,
+          tags: ['golf'],
+          priority: 3,
+          click: s.bookingUrl,
+          actions: [{ action: 'view', label: 'Book now', url: s.bookingUrl }],
+        }),
       });
+      if (!res.ok) console.error(`[notify] push rejected: ${res.status} ${await res.text()}`);
     } catch (err) {
       console.error('[notify] push failed:', err.message);
     }

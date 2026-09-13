@@ -1,8 +1,8 @@
 // Golf O'Clock — Service Worker
-// v1.5.0 (Nine-day window)
+// v1.5.1 (Alerts actually send)
 // Bump CACHE_NAME when you want installed PWA clients to re-fetch cached assets.
 
-const CACHE_NAME = 'golfoclock-v8';
+const CACHE_NAME = 'golfoclock-v9';
 const CORE_ASSETS = [
   './',
   './index.html',

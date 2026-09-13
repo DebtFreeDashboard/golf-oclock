@@ -1,9 +1,10 @@
 {
-  "version": "1.5.0",
-  "releaseDate": "2026-09-12",
-  "releaseName": "Nine-day window",
+  "version": "1.5.1",
+  "releaseDate": "2026-09-13",
+  "releaseName": "Alerts actually send",
   "notes": [
-    "The tee sheet now reaches eight days past today instead of seven, so the far end of every course's booking window is visible the moment it opens.",
-    "Alerts watch that extra day too — a Saturday rule now catches next Saturday a day earlier than it used to."
+    "Fixed the bug that stopped every tee time alert from being delivered. Notification titles contain an emoji and an em dash, which cannot legally travel in an HTTP header — the push was rejected inside the app before it ever reached the notification service, and the error was caught and logged rather than surfaced. Alerts are now sent as JSON, which carries any character.",
+    "If you have been wondering why your phone never buzzed: this was why, and it had been happening since launch.",
+    "The watchdog reports a rejected push instead of swallowing it, so a delivery failure can never be silent again."
   ]
 }

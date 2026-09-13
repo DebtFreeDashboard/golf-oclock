@@ -60,21 +60,28 @@ async function gh(path, init = {}) {
   return res.status === 204 ? null : res.json();
 }
 
+const PRIORITIES = { min: 1, low: 2, default: 3, high: 4, max: 5 };
+
 async function push({ title, body, priority = 'high', tags = 'warning' }) {
   const topic = process.env.NTFY_TOPIC;
   if (!topic) return console.log('[watchdog] NTFY_TOPIC not set — skipping push.');
   if (DRY_RUN) return console.log(`[watchdog] DRY RUN would push: ${title} — ${body}`);
+  // JSON, not headers — see the note in notify.js. Header values are Latin-1;
+  // these titles are not.
   try {
-    await fetch(`${NTFY_SERVER}/${encodeURIComponent(topic)}`, {
+    const res = await fetch(NTFY_SERVER, {
       method: 'POST',
-      headers: {
-        Title: title,
-        Tags: tags,
-        Priority: priority,
-        Click: `https://github.com/${REPO}/actions`,
-      },
-      body,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic,
+        title,
+        message: body,
+        tags: [tags],
+        priority: PRIORITIES[priority] ?? 3,
+        click: `https://github.com/${REPO}/actions`,
+      }),
     });
+    if (!res.ok) console.error(`[watchdog] push rejected: ${res.status} ${await res.text()}`);
   } catch (err) {
     console.error('[watchdog] push failed:', err.message);
   }
