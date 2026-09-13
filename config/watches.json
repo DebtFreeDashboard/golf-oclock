@@ -15,7 +15,7 @@
   "watches": [
     {
       "label": "Pine Valley · Sun, Sep 20",
-      "enabled": false,
+      "enabled": true,
       "courses": [
         "pine-valley"
       ],
