@@ -81,6 +81,19 @@ async function push({ title, body, priority = 'high', tags = 'warning' }) {
 }
 
 async function main() {
+  // A healthy pipeline is silent, so the push path is never exercised in normal
+  // operation — an alarm nobody has heard ring is not yet an alarm. TEST_PUSH
+  // sends one deliberately, from a manual run, and changes nothing else.
+  if (process.env.TEST_PUSH === 'true') {
+    console.log('[watchdog] sending test push.');
+    await push({
+      title: '⛳ Watchdog test',
+      body: 'If this reached your phone, stale-data and stuck-run alerts will too.',
+      priority: 'default',
+      tags: 'white_check_mark',
+    });
+  }
+
   const problems = [];
 
   // ---- 1. Is the data fresh? -------------------------------------------
